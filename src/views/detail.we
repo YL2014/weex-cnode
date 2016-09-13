@@ -1,0 +1,140 @@
+<template>
+	<div>
+		<header title="主题"></header>
+		<div class="container">
+			<div class="title-cont">
+				<text class="page-title">{{info.title}}</text>
+			</div>
+			<div class="author-cont">
+				<image class="author-img" src="{{info.avatar_url}}"></image>
+				<div>
+					<div style="width:550; flex-direction:row; justify-content: space-between;">
+						<text>{{info.loginname}}</text>
+						<text class="tab" style="background-color:{{info.backgroundColor}};">{{info.tab}}</text>
+					</div>
+					<div style="width:550; flex-direction:row; justify-content: space-between;">
+						<text>发布于：{{info.create_at}}</text>
+						<text>{{info.visit_count}}次浏览</text>
+					</div>
+				</div>
+			</div>
+			<div class="content-cont">
+				<text value="{{info.content}}"></text>
+			</div>
+			<div class="reply-cont">
+				<text style="color:#42b983; margin-right:10;">{{info.reply_count}}</text>
+				<text>回复</text>
+			</div>
+		</div>
+		
+	</div>
+</template>
+
+<style>
+	.container {
+		padding-top: 88;
+	}
+	.title-cont{
+		padding-left: 40;
+		padding-right: 40;
+	} 
+	.page-title {
+		padding: 10;
+		margin-top: 20;
+		border-radius: 10;
+		background-color: #f0f0f0;
+		color: #2c3e50;
+		font-size: 36;
+		font-weight: bold;
+	}
+	.author-cont {
+		flex-direction: row;
+		margin-top:20;
+		margin-bottom: 30;
+		padding-left: 40;
+		padding-right: 40;
+	}
+	.author-img {
+		width: 80;
+		height: 80;
+		margin-right: 30;
+		border-radius: 40;
+	}
+	.tab {
+		padding-top: 5;
+		padding-bottom: 5;
+		padding-left: 20;
+		padding-right: 20;
+		border-radius: 10;
+		color: #fff;
+	}
+	.content-cont {
+		padding-left: 40;
+		padding-right: 40;
+		padding-top: 20;
+		padding-bottom: 30;
+	}
+	.reply-cont {
+		flex-direction: row;
+		justify-content: flex-start;
+		padding: 40;
+		border-top: 1 solid #ededed;
+		border-bottom: 1 solid #ededed;
+	}
+</style>
+
+<script>
+	var utils = require('../utils/utils');
+	module.exports = {
+		data: {
+			info: {}
+		},
+		ready: function(){
+			var _this = this;
+			var storage = require('@weex-module/storage');
+			storage.getItem('pageId', function(e){
+				console.log(e.data);
+				_this.getData(e.data);
+			});
+		},
+		methods: {
+			getData: function(id){
+				var _this = this;
+				var stream = require('@weex-module/stream');
+				var url = 'https://cnodejs.org/api/v1/topic/'+id;
+				stream.fetch({
+					method: 'GET',
+					url: url,
+					type: 'json'
+				}, function(res){
+					if(res.status == 200){
+						_this.info = _this.filterData(res.data.data);
+						console.log(_this.info.author.avatar_url)
+					}
+				}, function(err){
+					console.log(err);
+				});
+			},
+			filterData: function(data){
+				console.log(data)
+				data.create_at = utils.lastData(data.create_at);
+				data.last_reply_at = utils.lastData(data.last_reply_at);
+				if(data.tab){
+					data.backgroundColor = utils.tabEnum[data.tab]['backgroundColor'];
+					data.tab = utils.tabEnum[data.tab]['text'];
+				}else{
+					data.backgroundColor = '#e7e7e7';
+					data.tab = '暂无';
+				}
+				if(data.replies){
+					data.replies.forEach(function(item){
+						item.create_at = utils.lastData(item.create_at);
+					});
+				}
+				data.loginname = data.author.loginname;
+				data.avatar_url = data.author.avatar_url;
+				return data;
+			}
+		}
+	}
+</script>

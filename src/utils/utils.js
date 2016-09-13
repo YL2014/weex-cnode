@@ -21,10 +21,12 @@ exports.getBaseUrl = function(obj){
         host = matches[1];
       }
       //nativeBase = 'http://' + host + '/weex_tmp/h5_render/';
+      // http:// + host + /dist/index.html?page=./dist/ + pagename
       nativeBase = 'http://' + host + '/' + obj.dir + '/dist/';
     }
     //需要考虑下
-    var h5Base = './index.html?page=./' + obj.dir + '/dist/';
+    var h5Base = './index.html?page=./dist/';
+    // var h5Base = './index.html?page=./' + obj.dir + '/dist/';
     //Native端
     var base = nativeBase;
     //H5端

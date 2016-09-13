@@ -24,10 +24,12 @@
       title: "全部"
     },
     ready: function () {
+      var _this = this;
       var enumTitle = utils.tabEnum;
       this.$on('loadList', function(e){
-        this.title = enumTitle[e.detail.tab.text];
-        this.$broadcast('loadPage', {tab: e.detail.tab});
+        console.log(e.detail.tab)
+        _this.title = enumTitle[e.detail.tab]['text'];
+        _this.$broadcast('loadPage', {tab: e.detail.tab});
       });
     }
   }

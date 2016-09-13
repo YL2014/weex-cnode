@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<div class="head-nav" id="headNav">
-			<wxc-navpage class="nav" height="88" background-color="backgroundColor" title-color="{{titleColor}}" left-item-src="{{leftItemSrc}}" title="{{title}}">
+			<wxc-navpage class="nav" height="88" background-color="{{backgroundColor}}" title-color="{{titleColor}}" left-item-src="{{leftItemSrc}}" title="{{title}}">
 			</wxc-navpage>
 		</div>
 		<div class="page-cover" if="{{showCover}}" onclick="hideCover"></div>
@@ -17,6 +17,7 @@
 		top: 0;
 		left: 0;
 		z-index: 7;
+		/*background-color: #fff;*/
 	}
 	.nav {
 		box-shadow: 0 0 4px rgba(0,0,0,25);

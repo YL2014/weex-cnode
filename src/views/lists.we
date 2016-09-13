@@ -1,7 +1,7 @@
 <template>
 	<container class="container">
 		<list id="scrollList" class="list" loadmoreoffset="2000" onloadmore="{{loadmore}}">
-			<cell class="cell" repeat="{{list}}" ids="{{id}}" id="{{ $index==0 ? 'first' : ''}}">
+			<cell class="cell" repeat="{{list}}" ids="{{id}}" id="{{ $index==0 ? 'first' : ''}}" onclick="{{todetail($index)}}">
 				<div class="title-cont">
 					<text class="tab-text" style="background:{{backgroundColor}};">{{tab}}</text>
 					<text class="title">{{title}}</text>
@@ -126,7 +126,8 @@
 			loading_display: 'hide',
 			refresh_display: 'hide',
 			tab: 'all',
-			page: 1
+			page: 1,
+			baseURL: ''
 		},
 		ready: function(){
 			this.loadData({page:1, tab:'all'});
@@ -230,6 +231,18 @@
 					item.last_reply_at = utils.lastData(item.last_reply_at);
 				});
 				return data;
+			},
+			todetail: function(index){
+				var id = this.list[index].id;
+				var storage = require('@weex-module/storage');
+				storage.setItem('pageId', id, function(){});
+				var _this = this;
+				var base = utils.getBaseUrl(_this);
+				var params = {
+					'url': base + 'detail.js',
+					'animated': 'true'
+				}
+				this.$call('navigator', 'push', params, function(){});
 			}
 		}
 	}
