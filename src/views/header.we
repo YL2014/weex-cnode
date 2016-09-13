@@ -1,0 +1,92 @@
+<template>
+	<div>
+		<div class="head-nav" id="headNav">
+			<wxc-navpage class="nav" height="88" background-color="backgroundColor" title-color="{{titleColor}}" left-item-src="{{leftItemSrc}}" title="{{title}}">
+			</wxc-navpage>
+		</div>
+		<div class="page-cover" if="{{showCover}}" onclick="hideCover"></div>
+		<tool-nav></tool-nav>
+	</div>
+	
+</template>
+
+<style>
+	.head-nav {
+		height: 88;
+		position: fixed;
+		top: 0;
+		left: 0;
+		z-index: 7;
+	}
+	.nav {
+		box-shadow: 0 0 4px rgba(0,0,0,25);
+		border-bottom: 1px solid #ccc;
+		height: 88;
+		 -webkit-transition: all .3s ease;
+		transition: all .3s ease;
+		transform: translateX(0px);
+		-webkit-transform: translateX(0px); 
+	}
+	.page-cover {
+		width: 750;
+		position: fixed;
+		flex: 1;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.4);
+		z-index: 7;
+	}
+</style>
+
+<script>
+	require('../components/wxc-navpage.we');
+	module.exports = {
+		data: {
+			backgroundColor: "#fff",
+			title: "全部",
+			titleColor: "#333",
+			leftItemSrc: "img/left.png",
+			showCover: false
+		},
+		ready: function () {
+			var animation = require('@weex-module/animation');
+			var headNav = this.$el('headNav');
+			this.$on('naviBar.leftItem.click', function(e){
+				// console.log('left')
+				this.showCover = true;
+				this.$broadcast('showNav', {});
+				animation.transition(headNav, {
+					styles: {
+						transform: 'translateX(450px)'
+					},
+					duration: 600,
+					timingFunction: 'ease',
+					delay: .3
+				}, function(){})
+			});
+			var _this = this;
+			this.$on('loadPage', function(){
+				this.hideCover();
+			});
+		},
+		methods: {
+			hideCover: function () {
+				this.showCover = false;
+				this.$broadcast('moveHeader', {});
+				var animation = require('@weex-module/animation');
+				var headNav = this.$el('headNav');
+				animation.transition(headNav, {
+					styles: {
+						transform: 'translateX(0)'
+					},
+					duration: 600,
+					timingFunction: 'ease',
+					delay: .3
+				}, function(){})
+			}
+		}
+	}
+</script>
+	

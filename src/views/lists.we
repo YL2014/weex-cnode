@@ -1,0 +1,236 @@
+<template>
+	<container class="container">
+		<list id="scrollList" class="list" loadmoreoffset="2000" onloadmore="{{loadmore}}">
+			<cell class="cell" repeat="{{list}}" ids="{{id}}" id="{{ $index==0 ? 'first' : ''}}">
+				<div class="title-cont">
+					<text class="tab-text" style="background:{{backgroundColor}};">{{tab}}</text>
+					<text class="title">{{title}}</text>
+				</div>
+				<div class="avatar-cont">
+					<image class="avatar" src={{author.avatar_url}}></image>
+					<div class="detail">
+						<div class="author-cont">
+							<text class="loginname">{{author.loginname}}</text>
+							<text class="count">{{reply_count}}/{{visit_count}}</text>
+						</div>
+						<div class="time-cont">
+							<text class="create">{{create_at}}</text>
+							<text class="last-reply">{{last_reply_at}}</text>
+						</div>
+					</div>
+				</div>
+			</cell>
+			<refresh class="refresh-view" onrefresh="{{onrefresh}}" display="{{refresh_display}}">
+				<text class="loadtxt" if="{{refresh_display=='hide'}}">刷新一下</text>
+				<loading-indicator class="loadic"></loading-indicator>
+			</refresh>
+			<loading  class="loading-view" display="{{loading_display}}" onloading="onloading">
+	            <text class="loadtxt" if="{{(loading_display==='hide')}}">无更多数据</text>
+	        <loading-indicator class="loadic"></loading-indicator>
+	        </loading>
+		</list>
+		<div class="totop" onclick="{{goTop}}">
+			<image class="totop-img" src="img/top.png"></image>
+		</div>
+	</container>
+</template>
+
+<style>
+	.container {
+		padding-top: 88;
+	}
+	.list {
+		height: 1246;
+	}
+	.cell {
+		padding-top: 20;
+		padding-bottom: 20;
+		padding-left: 30;
+		padding-right: 30;
+		border-bottom: 1px solid #d4d4d4;
+	}
+	.title-cont {
+		flex-direction: row;
+		margin-bottom: 10;
+		align-items: center;
+	}
+	.tab-text {
+		width: 80;
+		padding: 5;
+		margin-right: 20;
+		border-radius: 5;
+		color: #fff;
+		text-align: center;
+	}
+	.title {
+		width: 590;
+		lines:1;
+        text-overflow: ellipsis;
+	}
+	.avatar-cont {
+		flex-direction: row;
+	}
+	.avatar {
+		width: 80;
+		height: 80;
+		border-radius: 40;
+		margin-right: 20;
+	}
+	.author-cont, .time-cont {
+		width: 590;
+		flex-direction: row;
+		justify-content: space-between;
+	}
+	.loginname, .count, .create, .last-reply {
+		font-size: 28;
+	}
+	.totop {
+		position: fixed;
+		right: 30;
+		bottom: 200;
+		width: 100;
+		height: 100;
+		z-index: 6;
+	}
+	.totop-img {
+		width: 100;
+		height: 100;
+		border-radius: 50;
+		border: 2px solid #11cd6e;
+		background-color: #eee;
+	}
+	.refresh-view, .loading-view {
+		height: 120;
+		width: 750;
+		justify-content: center;
+		align-items: center;
+		background-color: transparent;
+	}
+	.loadic {
+		width: 60;
+		height: 60;
+		color: #3bafda;
+	}
+	.loadtxt {
+		font-size: 26;
+		color: #3bafda;
+		margin-bottom: 5;
+	}
+</style>
+
+<script>
+	var utils = require('../utils/utils');
+	module.exports = {
+		data: {
+			list: [],
+			loading_display: 'hide',
+			refresh_display: 'hide',
+			tab: 'all',
+			page: 1
+		},
+		ready: function(){
+			this.loadData({page:1, tab:'all'});
+			this.$on('loadPage', function(e){
+				var tab = e.detail.tab;
+				if(tab !='info' && tab != 'about' && tab != this.tab){
+					this.tab = tab;
+					this.loadData({
+						page: 1,
+						tab: tab
+					});
+				}
+
+			});
+		},
+		methods: {
+			loadData: function(opt){
+				var _this = this;
+				var stream = require('@weex-module/stream');
+				var url = 'https://cnodejs.org/api/v1/topics?limit=20&mdrender=true&page='+opt.page+'&tab='+opt.tab;
+				stream.fetch({
+					method: 'GET',
+					url: url,
+					type: 'json'
+				}, function(res){
+					if(res.status == 200){
+						var data = _this.filterData(res.data.data);
+						if(opt.page == 1){
+							_this.list = data;
+						}else{
+							_this.list = _this.list.concat(data);
+						}
+						//回调处理loading和refresh显示
+						if(opt.cb){
+							opt.cb();
+						}
+					}
+				}, function(err){
+					console.log(err);
+					//回调处理loading和refresh显示
+					if(opt.cb){
+						opt.cb();
+					}
+				});
+			},
+			//使用该方法自动加载下一页数据
+			loadmore: function(){
+				var _this = this;
+				this.loadData({
+					page: ++this.page,
+					tab: this.tab,
+					cb: function(){
+						// _this.loading_display = 'hide';
+					}
+				});
+			},
+			//暂时不适用来加载数据
+			onloading: function(){
+				var _this = this;
+		        _this.loading_display = 'show';
+		        // _this.loadmore();
+		        setTimeout(function(){
+		        	_this.loading_display = 'hide';
+		        }, 1000);
+			},
+			onrefresh: function(){
+				var _this = this;
+				_this.refresh_display = 'show';
+				_this.page = 1;
+				_this.loadData({
+					tab: _this.tab,
+					page: 1,
+					cb: function(){
+						_this.refresh_display = 'hide';
+					}
+				});
+
+			},
+			goTop: function(){
+				var dom = require('@weex-module/dom');
+				dom.scrollToElement(this.$el('first'), {offset: 10});
+			},
+			filterData: function(data){
+				var tabEnum = utils.tabEnum;
+				data.forEach(function(item){
+					if(item.top){
+						item.tab = '置顶';
+						item.backgroundColor = '#E74C3C';
+					}else if(item.good){
+						item.tab = '精华';
+						item.backgroundColor = '#E67E22';
+					}else if(!item.tab){
+						item.backgroundColor = '#e7e7e7';
+						item.tab = '暂无';
+					}else{
+						item.backgroundColor = tabEnum[item.tab]['backgroundColor'];
+						item.tab = tabEnum[item.tab]['text'];
+					}
+					// console.log(item.backgroundColor)
+					item.create_at = utils.lastData(item.create_at);
+					item.last_reply_at = utils.lastData(item.last_reply_at);
+				});
+				return data;
+			}
+		}
+	}
+</script>

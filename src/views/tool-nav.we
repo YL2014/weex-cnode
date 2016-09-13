@@ -1,0 +1,129 @@
+<template>
+	<div class="container {{show ? 'show' : ''}}">
+		<div class="logo-container">
+			<image class="logo" src="{{loginUrl}}"></image>
+			<text class="logo-title">登录</text>	
+		</div>
+		<div class="nav-container">
+			<div class="nav-item {{$index==5 ? 'line' : ''}}" repeat="{{navList}}" index="{{$index}}" onclick="loadPage($index)">
+				<image class="nav-img" src="{{imageUrl}}"></image>
+				<text class="nav-text">{{text}}</text>
+			</div>
+		</div>
+	</div>
+</template>
+
+<style>
+	.container {
+		position: fixed;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		width: 450;
+		z-index: 8;
+		background-color: #fff;
+		-webkit-transition: all .6s ease;
+		transition: all .6s ease;
+		transform: translateX(-600px);
+		-webkit-transform: translateX(-600px); 
+	}
+	.show {
+		transform: translateX(0);
+		-webkit-transform: translateX(0); 
+	}
+	.logo-container {
+		padding: 45;
+		flex-direction: row;
+		align-items: center;
+	}
+	.logo {
+		width: 48;
+		height: 48;
+		margin-right: 20;
+	}
+	.nav-container {
+		margin-left: 45;
+		margin-right: 45;
+		border-top: 1px solid #d4d4d4;
+	}
+	.nav-item {
+		flex-direction: row;
+		align-items: center;
+		padding-top: 30;
+		padding-bottom: 30;
+	}
+	.nav-img {
+		width: 48;
+		height: 48;
+		margin-right: 40;
+	}
+	.line {
+		border-top: 1px solid #d4d4d4;
+	}
+</style>
+
+<script>
+	module.exports = {
+		data: {
+			show: false,
+			loginUrl: "img/login.png",
+			navList: [
+				{
+					imageUrl: 'img/sort_light.png',
+					text: '全部',
+					tab: 'all'
+				},
+				{
+					imageUrl: 'img/appreciate_fill.png',
+					text: '精华',
+					tab: 'good'
+				},
+				{
+					imageUrl: 'img/share.png',
+					text: '分享',
+					tab: 'share'
+				},
+				{
+					imageUrl: 'img/wang_fill.png',
+					text: '问答',
+					tab: 'ask'
+				},
+				{
+					imageUrl: 'img/friend_fill.png',
+					text: '招聘',
+					tab: 'job'
+				},
+				{
+					imageUrl: 'img/notification_fill.png',
+					text: '消息',
+					tab: 'info'
+				},
+				{
+					imageUrl: 'img/info_fill.png',
+					text: '关于',
+					tab: 'about'
+				}
+
+			],
+			styles: {
+				transform: false
+			}
+		},
+		methods: {
+			loadPage: function(index){
+				var tab = this.navList[index].tab;
+				// console.log(tab);
+				this.$dispatch('loadList', {tab: tab});
+			}
+		},
+		ready: function(){
+			this.$on('showNav', function(e){
+				// console.log("showNav");
+				this.show = true;
+			});
+			this.$on('moveHeader', function(e){
+				this.show = false;
+			});
+		}
+	}
+</script>

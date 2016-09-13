@@ -1,0 +1,34 @@
+<template>
+  <div>
+    <header title="{{title}}"></header>
+    <lists></lists>
+  </div>
+  
+</template>
+
+<style>
+  .ct {
+    width: 750;
+    align-items: center;
+    justify-content: center;
+  }
+  .img {
+    margin-bottom: 20px;
+  }
+</style>
+
+<script>
+  var utils = require('../utils/utils')
+  module.exports = {
+    data: {
+      title: "全部"
+    },
+    ready: function () {
+      var enumTitle = utils.tabEnum;
+      this.$on('loadList', function(e){
+        this.title = enumTitle[e.detail.tab.text];
+        this.$broadcast('loadPage', {tab: e.detail.tab});
+      });
+    }
+  }
+</script>
