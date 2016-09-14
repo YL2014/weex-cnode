@@ -130,7 +130,16 @@
 			baseURL: ''
 		},
 		ready: function(){
-			this.loadData({page:1, tab:'all'});
+			var storage = require('@weex-module/storage');
+			var tab = 'all';
+			var _this = this;
+			storage.getItem('tab', function(e){
+				if(e.data  != 'undefined'){
+					tab = e.data;
+				}
+				_this.loadData({page:1, tab:tab});
+				storage.removeItem('tab', function(){});
+			});
 			this.$on('loadPage', function(e){
 				var tab = e.detail.tab;
 				if(tab !='info' && tab != 'about' && tab != this.tab){
@@ -140,7 +149,6 @@
 						tab: tab
 					});
 				}
-
 			});
 		},
 		methods: {
@@ -242,6 +250,9 @@
 					'url': base + 'detail.js',
 					'animated': 'true'
 				}
+				storage.setItem('pageName', 'detail', function(e){
+						console.log(e)
+				});
 				this.$call('navigator', 'push', params, function(){});
 			}
 		}

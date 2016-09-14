@@ -3,27 +3,50 @@
 		<header title="主题"></header>
 		<div class="container">
 			<div class="title-cont">
-				<text class="page-title">{{info.title}}</text>
+				<text class="page-title">{{infos.title}}</text>
 			</div>
 			<div class="author-cont">
-				<image class="author-img" src="{{info.avatar_url}}"></image>
+				<image class="author-img" src="{{infos.avatar_url}}"></image>
 				<div>
 					<div style="width:550; flex-direction:row; justify-content: space-between;">
-						<text>{{info.loginname}}</text>
-						<text class="tab" style="background-color:{{info.backgroundColor}};">{{info.tab}}</text>
+						<text value="{{infos.loginname}}"></text>
+						<text class="tab" style="background-color:{{infos.backgroundColor}};" value="{{infos.tab}}"></text>
 					</div>
 					<div style="width:550; flex-direction:row; justify-content: space-between;">
-						<text>发布于：{{info.create_at}}</text>
-						<text>{{info.visit_count}}次浏览</text>
+						<text value="发布于：{{infos.create_at}}"></text>
+						<text value="{{infos.visit_count}}次浏览"></text>
 					</div>
 				</div>
 			</div>
 			<div class="content-cont">
-				<text value="{{info.content}}"></text>
+				<text value="{{infos.content}}"></text>
 			</div>
 			<div class="reply-cont">
-				<text style="color:#42b983; margin-right:10;">{{info.reply_count}}</text>
+				<text style="color:#42b983; margin-right:10;" value="{{infos.reply_count}}"></text>
 				<text>回复</text>
+			</div>
+			<div class="reply-detail">
+				<div class="reply-item" repeat="{{infos.replies}}">
+					<div style="flex-direction:row; align-items:center; justify-content:space-between;">
+						<image style="width:80; height:80;  margin-right:20; border-radius:40;" src="{{author.avatar_url}}"></image>
+						<div>
+							<text value="{{author.loginname}}"></text>
+							<text value="发布于：{{create_at}}"></text>
+						</div>
+						<div style="flex-direction:row; align-items:center;">
+							<image style="width:60; height:60;" src="img/appreciate_fill.png"></image>
+							<text style="height:60; line-height:60; margin-left:20; margin-right:20;" value="{{ups.length}}"></text>
+							<image style="width:60; height:60;" src="img/message_fill.png"></image>
+						</div>
+					
+					</div>
+					<div style="margin-top:10;">
+						<text value="{{content}}"></text>
+					</div>
+					<div>
+						
+					</div>
+				</div>
 			</div>
 		</div>
 		
@@ -78,8 +101,15 @@
 		flex-direction: row;
 		justify-content: flex-start;
 		padding: 40;
-		border-top: 1 solid #ededed;
-		border-bottom: 1 solid #ededed;
+		border-top: 1px solid #333;
+		border-bottom: 1px solid #333;
+	}
+	.reply-item {
+		padding-left: 40;
+		padding-right: 40;
+		padding-top: 20;
+		padding-bottom: 20;
+		border-bottom: 1px solid #333;
 	}
 </style>
 
@@ -87,7 +117,12 @@
 	var utils = require('../utils/utils');
 	module.exports = {
 		data: {
-			info: {}
+			infos: {
+				replies: [],
+				create_at: '1s前',
+				visit_count: 0
+			},
+			replies: []
 		},
 		ready: function(){
 			var _this = this;
@@ -107,16 +142,18 @@
 					url: url,
 					type: 'json'
 				}, function(res){
+					console.log(res)
 					if(res.status == 200){
-						_this.info = _this.filterData(res.data.data);
-						console.log(_this.info.author.avatar_url)
+						_this.infos = _this.filterData(res.data.data);
+						console.log(_this.infos)
+						_this.replies = _this.infos.replies;
 					}
 				}, function(err){
 					console.log(err);
 				});
 			},
 			filterData: function(data){
-				console.log(data)
+				// console.log(data)
 				data.create_at = utils.lastData(data.create_at);
 				data.last_reply_at = utils.lastData(data.last_reply_at);
 				if(data.tab){
@@ -131,6 +168,8 @@
 						item.create_at = utils.lastData(item.create_at);
 					});
 				}
+				/*console.log(data)
+				console.log(data.replies)*/
 				data.loginname = data.author.loginname;
 				data.avatar_url = data.author.avatar_url;
 				return data;

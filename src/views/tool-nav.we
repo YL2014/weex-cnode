@@ -63,6 +63,7 @@
 </style>
 
 <script>
+	var utils = require('../utils/utils');
 	module.exports = {
 		data: {
 			show: false,
@@ -112,8 +113,24 @@
 		methods: {
 			loadPage: function(index){
 				var tab = this.navList[index].tab;
-				// console.log(tab);
-				this.$dispatch('loadList', {tab: tab});
+				var _this = this;
+				var storage = require('@weex-module/storage');
+				storage.setItem('tab', tab, function(){});
+				storage.getItem('pageName', function(e){
+					console.log(e.data)
+					if(e.data == 'detail'){
+						var base = utils.getBaseUrl(_this);
+						var params = {
+							'url': base + 'main.js',
+							'animated': 'true'
+						}
+						_this.$call('navigator', 'push', params, function(){
+							storage.setItem('pageName', 'main', function(){})
+						});
+					}else{
+						_this.$dispatch('loadList', {tab: tab});
+					}
+				});
 			}
 		},
 		ready: function(){
